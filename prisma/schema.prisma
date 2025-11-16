@@ -78,6 +78,9 @@ model User {
   certificates         Certificate[]
   coupons              Coupon[]                @relation("InstructorCoupons")
   announcements        Announcement[]
+  cart                 Cart?                   // 1-para-1 com carrinho de compras
+  wishlist             Wishlist[]              // Lista de desejos
+  notes                Note[]                  // Anotações privadas
 }
 
 // Modelo de Conta para Next-Auth (OAuth)
@@ -166,6 +169,8 @@ model Course {
   coupons       Coupon[]
   announcements Announcement[]
   targetAudience CourseTargetAudience[]
+  cartItems     CartItem[]
+  wishlists     Wishlist[]
 
   @@index([instructorId])
   @@index([categoryId])
@@ -215,6 +220,7 @@ model Lesson {
   attachments   Attachment[]
   completedBy   CompletedLesson[]
   questions     Question[]
+  notes         Note[]
 
   @@index([sectionId])
   @@index([sectionId, order])
@@ -538,4 +544,72 @@ model Announcement {
   @@index([courseId])
   @@index([authorId])
   @@index([createdAt])
+}
+
+// =============================================
+// MÓDULO 8: CARRINHO E LISTA DE DESEJOS
+// =============================================
+
+// Carrinho de compras (1-para-1 com usuário)
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+}
+
+// Itens no carrinho
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  courseId  String
+  addedAt   DateTime @default(now())
+
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, courseId]) // Não pode adicionar o mesmo curso 2 vezes
+  @@index([cartId])
+  @@index([courseId])
+}
+
+// Lista de desejos (Wishlist)
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  addedAt   DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId]) // Não pode adicionar o mesmo curso 2 vezes
+  @@index([userId])
+  @@index([courseId])
+}
+
+// =============================================
+// MÓDULO 9: ANOTAÇÕES PRIVADAS DO ALUNO
+// =============================================
+
+// Anotações privadas por aula
+model Note {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  timestamp Float?   // Timestamp do vídeo (em segundos) - opcional
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String
+  lessonId  String
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([lessonId])
+  @@index([userId, lessonId])
 }

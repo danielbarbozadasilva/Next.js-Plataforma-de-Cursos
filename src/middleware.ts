@@ -7,9 +7,21 @@ export default auth((req) => {
   const userRole = req.auth?.user?.role;
 
   // Public routes
-  if (pathname === "/login") {
+  const publicRoutes = ["/", "/login", "/signup", "/courses"];
+  const isPublicRoute = publicRoutes.some(route =>
+    pathname === route || pathname.startsWith("/courses/")
+  );
+
+  if (pathname === "/login" || pathname === "/signup") {
     if (isAuthenticated) {
-      return NextResponse.redirect(new URL("/admin", req.url));
+      // Redirecionar usuário autenticado baseado no role
+      if (userRole === "ADMIN") {
+        return NextResponse.redirect(new URL("/admin", req.url));
+      } else if (userRole === "INSTRUCTOR") {
+        return NextResponse.redirect(new URL("/instructor", req.url));
+      } else {
+        return NextResponse.redirect(new URL("/student/dashboard", req.url));
+      }
     }
     return NextResponse.next();
   }
@@ -22,6 +34,24 @@ export default auth((req) => {
 
     if (userRole !== "ADMIN") {
       return NextResponse.redirect(new URL("/unauthorized", req.url));
+    }
+  }
+
+  // Protected instructor routes
+  if (pathname.startsWith("/instructor")) {
+    if (!isAuthenticated) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+    if (userRole !== "INSTRUCTOR" && userRole !== "ADMIN") {
+      return NextResponse.redirect(new URL("/unauthorized", req.url));
+    }
+  }
+
+  // Protected student routes
+  if (pathname.startsWith("/student")) {
+    if (!isAuthenticated) {
+      return NextResponse.redirect(new URL("/login", req.url));
     }
   }
 
