@@ -1,0 +1,495 @@
+// Este é o seu arquivo schema.prisma
+
+// 1. Configuração do Provider (MySQL) e Gerador (Prisma Client)
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
+// 2. ENUMS (Tipos pré-definidos)
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  ALL_LEVELS
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum VideoProcessingStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+// =============================================
+// MÓDULO 1: NÚCLEO DE USUÁRIOS E AUTENTICAÇÃO
+// =============================================
+
+model User {
+  id              String   @id @default(cuid())
+  name            String
+  email           String   @unique
+  emailVerified   DateTime?
+  passwordHash    String? // Nulo se for login social (OAuth)
+  image           String?
+  role            Role     @default(STUDENT)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relações de Autenticação (Padrão Next-Auth)
+  accounts Account[]
+  sessions Session[]
+
+  // Relações da Plataforma
+  coursesAsInstructor  Course[]                @relation("InstructorCourses")
+  enrollments          Enrollment[]            @relation("StudentEnrollments")
+  reviews              Review[]
+  orders               Order[]
+  questions            Question[]
+  answers              Answer[]
+  completedLessons     CompletedLesson[]
+  chatParticipations   ChatParticipant[]
+  sentMessages         ChatMessage[]           @relation("SentMessages")
+  instructorProfile    InstructorProfile?      // 1-para-1 com perfil de instrutor
+  instructorPayouts    InstructorPayout[]
+  certificates         Certificate[]
+}
+
+// Modelo de Conta para Next-Auth (OAuth)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+// Modelo de Sessão para Next-Auth
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Modelo de Verificação para Next-Auth (reset de senha, etc.)
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Perfil específico do Instrutor (1-para-1)
+model InstructorProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique // Chave estrangeira 1-para-1
+  bio          String?  @db.Text
+  websiteUrl   String?
+  balance      Decimal  @default(0.00) @db.Decimal(10, 2)
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+
+// =============================================
+// MÓDULO 2: ESTRUTURA DO CURSO
+// =============================================
+
+model Course {
+  id            String     @id @default(cuid())
+  title         String
+  description   String     @db.LongText
+  imageUrl      String?
+  price         Decimal    @db.Decimal(10, 2)
+  isPublished   Boolean    @default(false)
+  level         CourseLevel @default(ALL_LEVELS)
+  language      String     @default("pt-br")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // Chave estrangeira para o Instrutor
+  instructorId  String
+  instructor    User       @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Restrict) // Restrict: Não deletar usuário se ele tiver cursos
+
+  // Chave estrangeira para Categoria
+  categoryId    String
+  category      Category   @relation(fields: [categoryId], references: [id])
+
+  // Relações (O que um curso "tem")
+  sections      Section[]
+  enrollments   Enrollment[]
+  reviews       Review[]
+  orderItems    OrderItem[]
+  requirements  CourseRequirement[]
+  learnObjectives LearningObjective[]
+  questions     Question[]
+  certificates  Certificate[]
+
+  @@index([instructorId])
+  @@index([categoryId])
+}
+
+model Category {
+  id    String   @id @default(cuid())
+  name  String   @unique
+  slug  String   @unique // Para URLs amigáveis
+
+  courses Course[]
+}
+
+model Section {
+  id         String   @id @default(cuid())
+  title      String
+  order      Int      // Para ordenar as seções
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Chave estrangeira para o Curso
+  courseId   String
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade) // Se o curso for deletado, as seções vão junto
+
+  // Relações
+  lessons    Lesson[]
+
+  @@index([courseId])
+  @@index([courseId, order]) // Para buscar seções ordenadas
+}
+
+model Lesson {
+  id            String   @id @default(cuid())
+  title         String
+  order         Int      // Para ordenar as aulas dentro da seção
+  isFreePreview Boolean  @default(false) // Permite pre-visualização
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Chave estrangeira para a Seção
+  sectionId     String
+  section       Section  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  // Relações (O que uma aula "tem")
+  videoData     VideoData?       // Relação 1-para-1 (ou nula)
+  textContent   TextContent?     // Relação 1-para-1 (ou nula)
+  attachments   Attachment[]
+  completedBy   CompletedLesson[]
+  questions     Question[]
+
+  @@index([sectionId])
+  @@index([sectionId, order])
+}
+
+// Requisitos do Curso (ex: "Saber HTML básico")
+model CourseRequirement {
+  id       String @id @default(cuid())
+  text     String
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+}
+
+// O que o aluno vai aprender (ex: "Construir APIs REST")
+model LearningObjective {
+  id       String @id @default(cuid())
+  text     String
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+}
+
+
+// =============================================
+// MÓDULO 3: CONTEÚDO DA AULA (Vídeo, Texto, Anexos)
+// =============================================
+
+// Armazena metadados do vídeo (ex: Mux, S3)
+model VideoData {
+  id             String                @id @default(cuid())
+  lessonId       String                @unique // Relação 1-para-1 com a Aula
+  lesson         Lesson                @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  storageKey     String?               // Chave do arquivo no S3 (vídeo original)
+  playbackId     String?               // ID de playback (Mux, Vimeo, etc.)
+  duration       Float?                // Duração em segundos
+  processingStatus VideoProcessingStatus @default(PENDING)
+}
+
+// Armazena conteúdo textual (aulas de artigo)
+model TextContent {
+  id       String @id @default(cuid())
+  lessonId String @unique // Relação 1-para-1 com a Aula
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  content  String @db.LongText
+}
+
+// Anexos para download (ZIP, PDF)
+model Attachment {
+  id       String   @id @default(cuid())
+  name     String   // Nome do arquivo (ex: "codigo_fonte.zip")
+  url      String   // URL do S3/storage
+  lessonId String
+  lesson   Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+}
+
+
+// =============================================
+// MÓDULO 4: MATRÍCULA E PROGRESSO
+// =============================================
+
+// Tabela de Junção (Muitos-para-Muitos) entre Aluno e Curso
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+
+  user      User     @relation("StudentEnrollments", fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId]) // Aluno só pode se matricular 1 vez
+  @@index([userId])
+  @@index([courseId])
+}
+
+// Tabela de Junção (M-para-M) para rastrear progresso
+model CompletedLesson {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  completedAt DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId]) // Só pode completar 1 vez
+  @@index([userId])
+  @@index([lessonId])
+}
+
+// Certificado emitido ao completar 100%
+model Certificate {
+  id                String   @id @default(cuid())
+  userId            String
+  courseId          String
+  issuedAt          DateTime @default(now())
+  verificationCode  String   @unique // Código único para validar o certificado
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course            Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId]) // 1 certificado por aluno/curso
+  @@index([userId])
+  @@index([courseId])
+}
+
+// =============================================
+// MÓDULO 5: FINANÇAS E PAGAMENTOS
+// =============================================
+
+model Order {
+  id                   String      @id @default(cuid())
+  userId               String
+  totalAmount          Decimal     @db.Decimal(10, 2)
+  status               OrderStatus @default(PENDING)
+  gateway              String?     // "stripe", "mercadopago"
+  gatewayTransactionId String?     @unique
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  user                 User        @relation(fields: [userId], references: [id], onDelete: Restrict) // Não deletar usuário se tiver compras
+  items                OrderItem[]
+
+  @@index([userId])
+}
+
+// Itens dentro de um pedido
+model OrderItem {
+  id              String   @id @default(cuid())
+  orderId         String
+  courseId        String
+  priceAtPurchase Decimal  @db.Decimal(10, 2) // Preço no momento da compra
+
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  course          Course   @relation(fields: [courseId], references: [id], onDelete: Restrict) // Não deletar curso se foi comprado
+
+  @@index([orderId])
+  @@index([courseId])
+}
+
+model Coupon {
+  id           String    @id @default(cuid())
+  code         String    @unique
+  discountType String    // PERCENTAGE ou FIXED
+  value        Decimal   @db.Decimal(10, 2)
+  expiresAt    DateTime?
+  maxUses      Int?
+  usedCount    Int       @default(0)
+
+  // Opcional: Ligar cupom a curso ou instrutor específico
+  // courseId String?
+  // instructorId String?
+}
+
+// Saques solicitados por instrutores
+model InstructorPayout {
+  id            String       @id @default(cuid())
+  instructorId  String
+  amount        Decimal      @db.Decimal(10, 2)
+  status        PayoutStatus @default(PENDING)
+  requestedAt   DateTime     @default(now())
+  processedAt   DateTime?
+  notes         String?      @db.Text // Motivo de falha, etc.
+
+  instructor    User         @relation(fields: [instructorId], references: [id], onDelete: Restrict)
+
+  @@index([instructorId])
+  @@index([status])
+}
+
+
+// =============================================
+// MÓDULO 6: COMUNIDADE E CHAT (Socket.io)
+// =============================================
+
+// Avaliações (Reviews)
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1 a 5
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String
+  courseId  String
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId]) // 1 review por aluno/curso
+  @@index([userId])
+  @@index([courseId])
+}
+
+// Perguntas do fórum (Q&A)
+model Question {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  authorId  String
+  courseId  String
+  lessonId  String?  // Opcional: pergunta pode ser sobre uma aula específica
+
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson    Lesson?  @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+
+  answers   Answer[] // Respostas da pergunta
+
+  @@index([authorId])
+  @@index([courseId])
+  @@index([lessonId])
+}
+
+// Respostas do fórum (Q&A)
+model Answer {
+  id           String   @id @default(cuid())
+  content      String   @db.Text
+  createdAt    DateTime @default(now())
+  isBestAnswer Boolean  @default(false) // Marcado pelo instrutor
+
+  authorId     String
+  questionId   String
+
+  author       User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@index([questionId])
+}
+
+// -- Modelos para o Chat (Socket.io) --
+
+// A "sala" de chat (conversa)
+model Chat {
+  id           String            @id @default(cuid())
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  participants ChatParticipant[] // Quem está na conversa
+  messages     ChatMessage[]     // Todas as mensagens
+}
+
+// Tabela de Junção (M-para-M) entre User e Chat
+model ChatParticipant {
+  id      String @id @default(cuid())
+  userId  String
+  chatId  String
+
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chat    Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chatId])
+  @@index([userId])
+  @@index([chatId])
+}
+
+// A mensagem individual
+model ChatMessage {
+  id        String    @id @default(cuid())
+  content   String    @db.Text
+  createdAt DateTime  @default(now())
+  readAt    DateTime? // Para o status "visto"
+
+  senderId  String
+  chatId    String
+
+  sender    User      @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  chat      Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([chatId])
+  @@index([chatId, createdAt]) // Para buscar mensagens ordenadas
+}
