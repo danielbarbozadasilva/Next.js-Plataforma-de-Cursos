@@ -4,6 +4,10 @@
   "description": "> Uma plataforma completa de ensino a distância (EAD) construída com Next.js 15, TypeScript, PostgreSQL e Socket.io.",
   "main": "index.js",
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
     "test": "echo \"Error: no test specified\" && exit 1",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
@@ -24,12 +28,36 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.11.1",
+    "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^6.19.0",
-    "prisma": "^6.19.0"
+    "bcryptjs": "^3.0.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.553.0",
+    "next": "^16.0.3",
+    "next-auth": "^5.0.0-beta.30",
+    "prisma": "^6.19.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-hook-form": "^7.66.0",
+    "recharts": "^3.4.1",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20.10.6",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.22",
+    "eslint": "^9.39.1",
+    "eslint-config-next": "^16.0.3",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3",
-    "@types/node": "^20.10.6"
+    "typescript": "^5.3.3"
   }
 }
