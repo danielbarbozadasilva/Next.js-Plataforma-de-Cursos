@@ -76,6 +76,8 @@ model User {
   instructorProfile    InstructorProfile?      // 1-para-1 com perfil de instrutor
   instructorPayouts    InstructorPayout[]
   certificates         Certificate[]
+  coupons              Coupon[]                @relation("InstructorCoupons")
+  announcements        Announcement[]
 }
 
 // Modelo de Conta para Next-Auth (OAuth)
@@ -161,6 +163,9 @@ model Course {
   learnObjectives LearningObjective[]
   questions     Question[]
   certificates  Certificate[]
+  coupons       Coupon[]
+  announcements Announcement[]
+  targetAudience CourseTargetAudience[]
 
   @@index([instructorId])
   @@index([categoryId])
@@ -227,6 +232,16 @@ model CourseRequirement {
 
 // O que o aluno vai aprender (ex: "Construir APIs REST")
 model LearningObjective {
+  id       String @id @default(cuid())
+  text     String
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+}
+
+// Público-alvo do curso (ex: "Desenvolvedores iniciantes")
+model CourseTargetAudience {
   id       String @id @default(cuid())
   text     String
   courseId String
@@ -365,10 +380,19 @@ model Coupon {
   expiresAt    DateTime?
   maxUses      Int?
   usedCount    Int       @default(0)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
 
-  // Opcional: Ligar cupom a curso ou instrutor específico
-  // courseId String?
-  // instructorId String?
+  // Cupom pode ser global (admin) ou específico de um curso/instrutor
+  courseId     String?
+  instructorId String?
+
+  course       Course?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  instructor   User?     @relation("InstructorCoupons", fields: [instructorId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@index([instructorId])
+  @@index([code])
 }
 
 // Saques solicitados por instrutores
@@ -492,4 +516,26 @@ model ChatMessage {
   @@index([senderId])
   @@index([chatId])
   @@index([chatId, createdAt]) // Para buscar mensagens ordenadas
+}
+
+// =============================================
+// MÓDULO 7: ANÚNCIOS DO INSTRUTOR
+// =============================================
+
+// Anúncios enviados pelo instrutor aos alunos de um curso
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   @db.Text
+  courseId    String
+  authorId    String   // Instrutor que criou o anúncio
+  createdAt   DateTime @default(now())
+  sendEmail   Boolean  @default(true) // Se deve enviar e-mail aos alunos
+
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@index([authorId])
+  @@index([createdAt])
 }
