@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: "Você já está matriculado em um ou mais desses cursos",
-          enrolledCourses: existingEnrollments.map((e) => e.courseId),
+          enrolledCourses: existingEnrollments.map((e: any) => e.courseId),
         },
         { status: 400 }
       );
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     // Calcular total
     let totalAmount = courses.reduce(
-      (sum, course) => sum + Number(course.price),
+      (sum: any, course: any) => sum + Number(course.price),
       0
     );
 
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
         status: "PENDING",
         gateway: getPaymentGateway(paymentMethod),
         items: {
-          create: courses.map((course) => ({
+          create: courses.map((course: any) => ({
             courseId: course.id,
             priceAtPurchase: course.price,
           })),
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
 
       // Criar matrículas
       await db.enrollment.createMany({
-        data: courses.map((course) => ({
+        data: courses.map((course: any) => ({
           userId: session.user.id,
           courseId: course.id,
         })),
@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Dados inválidos", details: error.errors },
+        { error: "Dados inválidos", details: error.issues },
         { status: 400 }
       );
     }

@@ -228,7 +228,7 @@ export default async function AdminDashboard() {
                 Nenhum pedido encontrado
               </p>
             ) : (
-              recentOrders.map((order) => (
+              recentOrders.map((order: any) => (
                 <div
                   key={order.id}
                   className="flex items-center justify-between border-b pb-4 last:border-0"

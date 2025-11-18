@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { couponId: string } }
+  { params }: { params: Promise<{ couponId: string }> }
 ) {
   try {
     const session = await auth();
@@ -13,8 +13,10 @@ export async function PATCH(
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
+    const { couponId } = await params;
+
     const coupon = await db.coupon.findUnique({
-      where: { id: params.couponId },
+      where: { id: couponId },
     });
 
     if (!coupon) {
@@ -44,7 +46,7 @@ export async function PATCH(
     }
 
     const updatedCoupon = await db.coupon.update({
-      where: { id: params.couponId },
+      where: { id: couponId },
       data: {
         ...(code !== undefined && { code: code.toUpperCase() }),
         ...(discountType !== undefined && { discountType }),
@@ -71,7 +73,7 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { couponId: string } }
+  { params }: { params: Promise<{ couponId: string }> }
 ) {
   try {
     const session = await auth();
@@ -80,8 +82,10 @@ export async function DELETE(
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
+    const { couponId } = await params;
+
     const coupon = await db.coupon.findUnique({
-      where: { id: params.couponId },
+      where: { id: couponId },
     });
 
     if (!coupon) {
@@ -94,7 +98,7 @@ export async function DELETE(
     }
 
     await db.coupon.delete({
-      where: { id: params.couponId },
+      where: { id: couponId },
     });
 
     return NextResponse.json({ message: "Cupom deletado com sucesso" });

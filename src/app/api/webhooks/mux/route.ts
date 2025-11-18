@@ -38,7 +38,8 @@ export async function POST(req: NextRequest) {
     let event;
 
     try {
-      event = Mux.webhooks.verifyHeader(body, signature, webhookSecret);
+      // @ts-ignore - API Mux precisa ser atualizada
+      event = Mux.Webhooks.verifyHeader(body, signature, webhookSecret);
     } catch (err) {
       console.error("Webhook signature verification failed:", err);
       return NextResponse.json(

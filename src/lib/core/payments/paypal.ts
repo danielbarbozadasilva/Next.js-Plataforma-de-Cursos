@@ -6,7 +6,7 @@
 
 import checkoutNodeJssdk from "@paypal/checkout-server-sdk";
 import { db } from "@/lib/db";
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus } from "@/lib/prisma-types";
 
 // Configuração do ambiente PayPal
 const environment = () => {

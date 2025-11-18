@@ -249,11 +249,11 @@ async function getTopCourses(instructorId: string) {
     },
   });
 
-  return courses.map((course) => ({
+  return courses.map((course: any) => ({
     ...course,
     averageRating:
       course.reviews.length > 0
-        ? course.reviews.reduce((sum, r) => sum + r.rating, 0) / course.reviews.length
+        ? course.reviews.reduce((sum: any, r: any) => sum + r.rating, 0) / course.reviews.length
         : 0,
   }));
 }
@@ -418,7 +418,7 @@ export default async function InstructorDashboard() {
                   Nenhuma matrícula encontrada
                 </p>
               ) : (
-                recentEnrollments.map((enrollment) => (
+                recentEnrollments.map((enrollment: any) => (
                   <div
                     key={enrollment.id}
                     className="flex items-center justify-between border-b pb-4 last:border-0"
@@ -452,7 +452,7 @@ export default async function InstructorDashboard() {
                   Nenhum curso encontrado
                 </p>
               ) : (
-                topCourses.map((course) => (
+                topCourses.map((course: any) => (
                   <div
                     key={course.id}
                     className="flex items-center justify-between border-b pb-4 last:border-0"

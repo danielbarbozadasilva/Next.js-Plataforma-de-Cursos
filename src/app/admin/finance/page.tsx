@@ -259,7 +259,7 @@ export default async function FinancePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pendingPayouts.map((payout) => (
+                {pendingPayouts.map((payout: any) => (
                   <TableRow key={payout.id}>
                     <TableCell>
                       <div>
@@ -319,7 +319,7 @@ export default async function FinancePage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                transactions.map((transaction) => (
+                transactions.map((transaction: any) => (
                   <TableRow key={transaction.id}>
                     <TableCell>
                       {formatDateTime(transaction.createdAt)}
@@ -335,7 +335,7 @@ export default async function FinancePage() {
                     <TableCell>
                       <div className="max-w-xs truncate">
                         {transaction.items
-                          .map((item) => item.course.title)
+                          .map((item: any) => item.course.title)
                           .join(", ")}
                       </div>
                     </TableCell>

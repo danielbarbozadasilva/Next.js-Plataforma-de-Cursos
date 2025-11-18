@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Email inválido", details: error.errors },
+        { error: "Email inválido", details: error.issues },
         { status: 400 }
       );
     }

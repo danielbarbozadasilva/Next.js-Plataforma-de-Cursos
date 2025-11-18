@@ -6,7 +6,7 @@ import { z } from "zod";
 // GET - Buscar mensagens de uma conversa
 export async function GET(
   req: NextRequest,
-  { params }: { params: { chatId: string } }
+  { params }: { params: Promise<{ chatId: string }> }
 ) {
   try {
     const session = await auth();
@@ -17,7 +17,7 @@ export async function GET(
       );
     }
 
-    const { chatId } = params;
+    const { chatId } = await params;
 
     // Verificar se o usuário é participante da conversa
     const participant = await db.chatParticipant.findFirst({
@@ -67,7 +67,7 @@ const sendMessageSchema = z.object({
 // POST - Enviar mensagem
 export async function POST(
   req: NextRequest,
-  { params }: { params: { chatId: string } }
+  { params }: { params: Promise<{ chatId: string }> }
 ) {
   try {
     const session = await auth();
@@ -78,7 +78,7 @@ export async function POST(
       );
     }
 
-    const { chatId } = params;
+    const { chatId } = await params;
     const body = await req.json();
     const { content } = sendMessageSchema.parse(body);
 
@@ -127,7 +127,7 @@ export async function POST(
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Dados inválidos", details: error.errors },
+        { error: "Dados inválidos", details: error.issues },
         { status: 400 }
       );
     }

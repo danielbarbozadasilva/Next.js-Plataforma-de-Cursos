@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus } from "@/lib/prisma-types";
 
 /**
  * POST /api/webhooks/paypal

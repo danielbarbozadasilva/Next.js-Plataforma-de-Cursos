@@ -6,7 +6,7 @@
 
 import Stripe from "stripe";
 import { db } from "@/lib/db";
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus } from "@/lib/prisma-types";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("STRIPE_SECRET_KEY is not defined in environment variables");
@@ -14,7 +14,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 
 // Inicializa o cliente Stripe
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-12-18.acacia",
+  apiVersion: "2025-10-29.clover",
   typescript: true,
 });
 

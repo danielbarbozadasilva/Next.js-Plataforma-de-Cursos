@@ -59,9 +59,9 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    const chats = chatParticipations.map((cp) => ({
+    const chats = chatParticipations.map((cp: any) => ({
       id: cp.chat.id,
-      participants: cp.chat.participants.map((p) => p.user),
+      participants: cp.chat.participants.map((p: any) => p.user),
       lastMessage: cp.chat.messages[0] || null,
       updatedAt: cp.chat.updatedAt,
     }));
@@ -194,7 +194,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Dados inválidos", details: error.errors },
+        { error: "Dados inválidos", details: error.issues },
         { status: 400 }
       );
     }

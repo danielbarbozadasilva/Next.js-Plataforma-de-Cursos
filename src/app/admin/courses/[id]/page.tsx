@@ -88,17 +88,17 @@ async function getCourseDetails(courseId: string) {
 
   const averageRating =
     course.reviews.length > 0
-      ? course.reviews.reduce((acc, r) => acc + r.rating, 0) /
+      ? course.reviews.reduce((acc: any, r: any) => acc + r.rating, 0) /
         course.reviews.length
       : 0;
 
   const totalRevenue = course.orderItems.reduce(
-    (acc, item) => acc + Number(item.priceAtPurchase),
+    (acc: any, item: any) => acc + Number(item.priceAtPurchase),
     0
   );
 
   const totalLessons = course.sections.reduce(
-    (acc, section) => acc + section.lessons.length,
+    (acc: any, section: any) => acc + section.lessons.length,
     0
   );
 
@@ -113,9 +113,10 @@ async function getCourseDetails(courseId: string) {
 export default async function CourseDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const course = await getCourseDetails(params.id);
+  const { id } = await params;
+  const course = await getCourseDetails(id);
 
   return (
     <div className="space-y-6">
@@ -265,7 +266,7 @@ export default async function CourseDetailPage({
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {course.learnObjectives.map((obj) => (
+              {course.learnObjectives.map((obj: any) => (
                 <li key={obj.id} className="flex items-start gap-2 text-sm">
                   <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                   <span>{obj.text}</span>
@@ -281,7 +282,7 @@ export default async function CourseDetailPage({
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {course.requirements.map((req) => (
+              {course.requirements.map((req: any) => (
                 <li key={req.id} className="flex items-start gap-2 text-sm">
                   <span className="text-muted-foreground">•</span>
                   <span>{req.text}</span>
@@ -299,11 +300,11 @@ export default async function CourseDetailPage({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {course.sections.map((section) => (
+            {course.sections.map((section: any) => (
               <div key={section.id} className="border rounded-lg p-4">
                 <h3 className="font-semibold mb-2">{section.title}</h3>
                 <ul className="space-y-1 ml-4">
-                  {section.lessons.map((lesson) => (
+                  {section.lessons.map((lesson: any) => (
                     <li key={lesson.id} className="text-sm text-muted-foreground">
                       {lesson.order}. {lesson.title}
                     </li>
@@ -327,7 +328,7 @@ export default async function CourseDetailPage({
                 Nenhuma avaliação ainda
               </p>
             ) : (
-              course.reviews.map((review) => (
+              course.reviews.map((review: any) => (
                 <div key={review.id} className="border-b pb-4 last:border-0">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">

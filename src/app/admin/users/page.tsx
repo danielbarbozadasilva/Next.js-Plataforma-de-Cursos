@@ -50,10 +50,10 @@ async function getUsers(searchParams: { search?: string; role?: string }) {
     take: 50,
   });
 
-  return users.map((user) => ({
+  return users.map((user: any) => ({
     ...user,
     totalSpent: user.orders.reduce(
-      (acc, order) => acc + Number(order.totalAmount),
+      (acc: any, order: any) => acc + Number(order.totalAmount),
       0
     ),
     enrollmentsCount: user.enrollments.length,
@@ -135,7 +135,7 @@ export default async function UsersPage({
                   </TableCell>
                 </TableRow>
               ) : (
-                users.map((user) => (
+                users.map((user: any) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>

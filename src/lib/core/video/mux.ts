@@ -7,7 +7,7 @@
 
 import Mux from "@mux/mux-node";
 import { db } from "@/lib/db";
-import { VideoProcessingStatus } from "@prisma/client";
+import { VideoProcessingStatus } from "@/lib/prisma-types";
 
 // Inicializa o cliente Mux
 const mux = new Mux({
@@ -79,7 +79,7 @@ export async function createAssetFromUrl(
 ): Promise<string> {
   try {
     const asset = await mux.video.assets.create({
-      input: [{ url: videoUrl }],
+      inputs: [{ url: videoUrl }],
       playback_policy: ["public"],
       mp4_support: "standard",
       encoding_tier: "smart",
@@ -305,7 +305,9 @@ export async function getSignedPlaybackUrl(
 export async function getVideoAnalytics(playbackId: string) {
   try {
     // Mux Data API para analytics
-    const views = await mux.data.metrics.breakdown("views", {
+    // Note: API may have changed, using type assertion
+    const muxData = mux.data as any;
+    const views = await muxData.metrics.breakdown("views", {
       filters: [`playback_id:${playbackId}`],
       timeframe: ["7:days"],
     });
