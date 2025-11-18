@@ -69,10 +69,10 @@ async function getCourses(searchParams: {
     take: 50,
   });
 
-  return courses.map((course) => {
+  return courses.map((course: any) => {
     const averageRating =
       course.reviews.length > 0
-        ? course.reviews.reduce((acc, r) => acc + r.rating, 0) /
+        ? course.reviews.reduce((acc: any, r: any) => acc + r.rating, 0) /
           course.reviews.length
         : 0;
 
@@ -101,8 +101,8 @@ export default async function CoursesPage({
   const courses = await getCourses(searchParams);
   const categories = await getCategories();
 
-  const pendingCount = courses.filter((c) => !c.isPublished).length;
-  const publishedCount = courses.filter((c) => c.isPublished).length;
+  const pendingCount = courses.filter((c: any) => !c.isPublished).length;
+  const publishedCount = courses.filter((c: any) => c.isPublished).length;
 
   return (
     <div className="space-y-6">
@@ -178,7 +178,7 @@ export default async function CoursesPage({
               className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm"
             >
               <option value="">Todas as categorias</option>
-              {categories.map((cat) => (
+              {categories.map((cat: any) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
                 </option>
@@ -216,7 +216,7 @@ export default async function CoursesPage({
                   </TableCell>
                 </TableRow>
               ) : (
-                courses.map((course) => (
+                courses.map((course: any) => (
                   <TableRow key={course.id}>
                     <TableCell>
                       <div className="max-w-xs">

@@ -4,7 +4,7 @@
  * Define permissões e recursos para cada role (ADMIN, INSTRUCTOR, STUDENT)
  */
 
-import { Role } from "@prisma/client";
+import { Role } from "@/lib/auth";
 import { Session } from "next-auth";
 
 // Recursos e ações disponíveis no sistema

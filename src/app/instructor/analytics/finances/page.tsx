@@ -178,7 +178,7 @@ export default async function FinancesPage() {
               {formatCurrency(finances.withdrawn)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {finances.payouts.filter((p) => p.status === "PROCESSED").length}{" "}
+              {finances.payouts.filter((p: any) => p.status === "PROCESSED").length}{" "}
               saque(s)
             </p>
           </CardContent>
@@ -197,7 +197,7 @@ export default async function FinancesPage() {
                 Nenhum saque solicitado ainda
               </p>
             ) : (
-              finances.payouts.map((payout) => (
+              finances.payouts.map((payout: any) => (
                 <div
                   key={payout.id}
                   className="flex items-center justify-between border-b pb-4 last:border-0"

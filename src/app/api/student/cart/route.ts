@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
 
     // Calcular total
     const total = cart.items.reduce(
-      (sum, item) => sum + Number(item.course.price),
+      (sum: any, item: any) => sum + Number(item.course.price),
       0
     );
 
@@ -165,7 +165,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Dados inválidos", details: error.errors },
+        { error: "Dados inválidos", details: error.issues },
         { status: 400 }
       );
     }
@@ -222,7 +222,7 @@ export async function DELETE(req: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Dados inválidos", details: error.errors },
+        { error: "Dados inválidos", details: error.issues },
         { status: 400 }
       );
     }

@@ -62,8 +62,8 @@ export default async function QAPage() {
   }
 
   const questions = await getInstructorQuestions(session.user.id);
-  const unanswered = questions.filter((q) => q.answers.length === 0);
-  const answered = questions.filter((q) => q.answers.length > 0);
+  const unanswered = questions.filter((q: any) => q.answers.length === 0);
+  const answered = questions.filter((q: any) => q.answers.length > 0);
 
   return (
     <div className="space-y-6">
@@ -133,7 +133,7 @@ export default async function QAPage() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {questions.map((question) => (
+            {questions.map((question: any) => (
               <Card key={question.id}>
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
@@ -195,7 +195,7 @@ export default async function QAPage() {
                       {/* Respostas */}
                       {question.answers.length > 0 && (
                         <div className="border-l-2 border-primary/20 pl-4 space-y-3 mb-4">
-                          {question.answers.map((answer) => (
+                          {question.answers.map((answer: any) => (
                             <div
                               key={answer.id}
                               className="bg-muted/50 p-3 rounded-lg"

@@ -214,7 +214,7 @@ export const certificateWorker = new Worker<CertificateGenerationJob>(
 
       // Conta total de aulas
       const totalLessons = course.sections.reduce(
-        (sum, section) => sum + section.lessons.length,
+        (sum: number, section: any) => sum + section.lessons.length,
         0
       );
 

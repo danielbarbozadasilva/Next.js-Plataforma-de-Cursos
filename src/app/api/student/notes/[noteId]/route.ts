@@ -11,7 +11,7 @@ const updateNoteSchema = z.object({
 // PUT - Atualizar nota
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { noteId: string } }
+  { params }: { params: Promise<{ noteId: string }> }
 ) {
   try {
     const session = await auth();
@@ -22,7 +22,7 @@ export async function PUT(
       );
     }
 
-    const { noteId } = params;
+    const { noteId } = await params;
     const body = await req.json();
     const { content, timestamp } = updateNoteSchema.parse(body);
 
@@ -60,7 +60,7 @@ export async function PUT(
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Dados inválidos", details: error.errors },
+        { error: "Dados inválidos", details: error.issues },
         { status: 400 }
       );
     }
@@ -76,7 +76,7 @@ export async function PUT(
 // DELETE - Deletar nota
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { noteId: string } }
+  { params }: { params: Promise<{ noteId: string }> }
 ) {
   try {
     const session = await auth();
@@ -87,7 +87,7 @@ export async function DELETE(
       );
     }
 
-    const { noteId } = params;
+    const { noteId } = await params;
 
     // Verificar se a nota existe e pertence ao usuário
     const note = await db.note.findUnique({

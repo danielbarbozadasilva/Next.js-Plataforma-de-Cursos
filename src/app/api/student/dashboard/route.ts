@@ -53,9 +53,9 @@ export async function GET(req: NextRequest) {
 
     // Calcular progresso de cada curso
     const coursesWithProgress = await Promise.all(
-      enrollments.map(async (enrollment) => {
+      enrollments.map(async (enrollment: any) => {
         const totalLessons = enrollment.course.sections.reduce(
-          (sum, section) => sum + section.lessons.length,
+          (sum: any, section: any) => sum + section.lessons.length,
           0
         );
 
@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
             : 0;
 
         const totalRating = enrollment.course.reviews.reduce(
-          (sum, r) => sum + r.rating,
+          (sum: any, r: any) => sum + r.rating,
           0
         );
         const avgRating =
@@ -148,10 +148,10 @@ export async function GET(req: NextRequest) {
     // Estatísticas gerais
     const stats = {
       totalCourses: enrollments.length,
-      completedCourses: coursesWithProgress.filter((c) => c.progressPercentage === 100).length,
-      inProgressCourses: coursesWithProgress.filter((c) => c.progressPercentage > 0 && c.progressPercentage < 100).length,
+      completedCourses: coursesWithProgress.filter((c: any) => c.progressPercentage === 100).length,
+      inProgressCourses: coursesWithProgress.filter((c: any) => c.progressPercentage > 0 && c.progressPercentage < 100).length,
       certificatesEarned: certificates.length,
-      totalSpent: orders.reduce((sum, order) => sum + Number(order.totalAmount), 0),
+      totalSpent: orders.reduce((sum: any, order: any) => sum + Number(order.totalAmount), 0),
     };
 
     return NextResponse.json({

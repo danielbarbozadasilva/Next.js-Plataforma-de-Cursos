@@ -64,7 +64,7 @@ async function getUserDetails(userId: string) {
 
   // Calcular progresso
   const enrollmentsWithProgress = await Promise.all(
-    user.enrollments.map(async (enrollment) => {
+    user.enrollments.map(async (enrollment: any) => {
       const totalLessons = await db.lesson.count({
         where: {
           section: {
@@ -105,13 +105,14 @@ async function getUserDetails(userId: string) {
 export default async function UserDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const user = await getUserDetails(params.id);
+  const { id } = await params;
+  const user = await getUserDetails(id);
 
   const totalSpent = user.orders
-    .filter((order) => order.status === "COMPLETED")
-    .reduce((acc, order) => acc + Number(order.totalAmount), 0);
+    .filter((order: any) => order.status === "COMPLETED")
+    .reduce((acc: any, order: any) => acc + Number(order.totalAmount), 0);
 
   return (
     <div className="space-y-6">
@@ -201,7 +202,7 @@ export default async function UserDetailPage({
             </p>
           ) : (
             <div className="space-y-4">
-              {user.enrollments.map((enrollment) => (
+              {user.enrollments.map((enrollment: any) => (
                 <div
                   key={enrollment.id}
                   className="flex items-center justify-between border-b pb-4 last:border-0"
@@ -252,11 +253,11 @@ export default async function UserDetailPage({
                   </TableCell>
                 </TableRow>
               ) : (
-                user.orders.map((order) => (
+                user.orders.map((order: any) => (
                   <TableRow key={order.id}>
                     <TableCell>{formatDateTime(order.createdAt)}</TableCell>
                     <TableCell>
-                      {order.items.map((item) => item.course.title).join(", ")}
+                      {order.items.map((item: any) => item.course.title).join(", ")}
                     </TableCell>
                     <TableCell>
                       {formatCurrency(Number(order.totalAmount))}

@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { courseId: string } }
+  { params }: { params: Promise<{ courseId: string }> }
 ) {
   try {
     const session = await auth();
@@ -13,9 +13,11 @@ export async function POST(
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
+    const { courseId } = await params;
+
     // Verificar se o curso pertence ao instrutor
     const course = await db.course.findUnique({
-      where: { id: params.courseId },
+      where: { id: courseId },
     });
 
     if (!course) {
@@ -38,7 +40,7 @@ export async function POST(
 
     // Buscar a maior ordem atual para calcular a próxima
     const lastSection = await db.section.findFirst({
-      where: { courseId: params.courseId },
+      where: { courseId },
       orderBy: { order: "desc" },
     });
 
@@ -46,7 +48,7 @@ export async function POST(
       data: {
         title: title.trim(),
         order: order !== undefined ? order : (lastSection?.order ?? -1) + 1,
-        courseId: params.courseId,
+        courseId,
       },
     });
 

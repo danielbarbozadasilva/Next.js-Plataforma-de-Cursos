@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
     }
 
     const totalLessons = course.sections.reduce(
-      (sum, section) => sum + section.lessons.length,
+      (sum: any, section: any) => sum + section.lessons.length,
       0
     );
 
@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
       totalLessons,
       completedLessons: completedCount,
       progressPercentage,
-      completedLessonIds: completedLessons.map((cl) => cl.lessonId),
+      completedLessonIds: completedLessons.map((cl: any) => cl.lessonId),
     });
   } catch (error) {
     console.error("Erro ao buscar progresso:", error);
@@ -222,7 +222,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Dados inválidos", details: error.errors },
+        { error: "Dados inválidos", details: error.issues },
         { status: 400 }
       );
     }

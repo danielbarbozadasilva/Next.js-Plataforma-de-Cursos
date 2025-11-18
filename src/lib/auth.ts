@@ -5,7 +5,10 @@ import Facebook from "next-auth/providers/facebook";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "./db";
 import bcrypt from "bcryptjs";
-import { Role } from "@prisma/client";
+import { Role } from "./prisma-types";
+
+// Re-export Role for convenience
+export { Role };
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),

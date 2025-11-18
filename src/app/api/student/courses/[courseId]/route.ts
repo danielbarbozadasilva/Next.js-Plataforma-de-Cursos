@@ -3,10 +3,10 @@ import { db } from "@/lib/db";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { courseId: string } }
+  { params }: { params: Promise<{ courseId: string }> }
 ) {
   try {
-    const { courseId } = params;
+    const { courseId } = await params;
 
     const course = await db.course.findUnique({
       where: {
@@ -78,15 +78,15 @@ export async function GET(
 
     // Calcular estatísticas do curso
     const totalLessons = course.sections.reduce(
-      (sum, section) => sum + section.lessons.length,
+      (sum: any, section: any) => sum + section.lessons.length,
       0
     );
 
     const totalDuration = course.sections.reduce(
-      (sum, section) =>
+      (sum: any, section: any) =>
         sum +
         section.lessons.reduce(
-          (lessonSum, lesson) =>
+          (lessonSum: any, lesson: any) =>
             lessonSum + (lesson.videoData?.duration || 0),
           0
         ),
@@ -94,7 +94,7 @@ export async function GET(
     );
 
     const totalRating = course.reviews.reduce(
-      (sum, review) => sum + review.rating,
+      (sum: any, review: any) => sum + review.rating,
       0
     );
     const avgRating =
@@ -102,19 +102,19 @@ export async function GET(
 
     // Calcular distribuição de ratings (1-5 estrelas)
     const ratingDistribution = {
-      5: course.reviews.filter((r) => r.rating === 5).length,
-      4: course.reviews.filter((r) => r.rating === 4).length,
-      3: course.reviews.filter((r) => r.rating === 3).length,
-      2: course.reviews.filter((r) => r.rating === 2).length,
-      1: course.reviews.filter((r) => r.rating === 1).length,
+      5: course.reviews.filter((r: any) => r.rating === 5).length,
+      4: course.reviews.filter((r: any) => r.rating === 4).length,
+      3: course.reviews.filter((r: any) => r.rating === 3).length,
+      2: course.reviews.filter((r: any) => r.rating === 2).length,
+      1: course.reviews.filter((r: any) => r.rating === 1).length,
     };
 
     // Preparar currículo (sections + lessons) sem conteúdo sensível
-    const curriculum = course.sections.map((section) => ({
+    const curriculum = course.sections.map((section: any) => ({
       id: section.id,
       title: section.title,
       order: section.order,
-      lessons: section.lessons.map((lesson) => ({
+      lessons: section.lessons.map((lesson: any) => ({
         id: lesson.id,
         title: lesson.title,
         order: lesson.order,

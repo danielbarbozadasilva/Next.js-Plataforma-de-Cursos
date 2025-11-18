@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { certificateId: string } }
+  { params }: { params: Promise<{ certificateId: string }> }
 ) {
   try {
     const session = await auth();
@@ -15,7 +15,7 @@ export async function GET(
       );
     }
 
-    const { certificateId } = params;
+    const { certificateId } = await params;
 
     const certificate = await db.certificate.findUnique({
       where: {
@@ -72,7 +72,7 @@ export async function GET(
 // GET PDF - Gerar PDF do certificado
 export async function POST(
   req: NextRequest,
-  { params }: { params: { certificateId: string } }
+  { params }: { params: Promise<{ certificateId: string }> }
 ) {
   try {
     const session = await auth();
@@ -83,7 +83,7 @@ export async function POST(
       );
     }
 
-    const { certificateId } = params;
+    const { certificateId } = await params;
 
     const certificate = await db.certificate.findUnique({
       where: {

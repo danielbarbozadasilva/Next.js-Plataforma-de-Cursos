@@ -21,7 +21,7 @@ async function getCoupons() {
   });
 
   const now = new Date();
-  return coupons.map((coupon) => {
+  return coupons.map((coupon: any) => {
     const isExpired = coupon.expiresAt && coupon.expiresAt < now;
     const isMaxedOut = coupon.maxUses && coupon.usedCount >= coupon.maxUses;
     const isActive = !isExpired && !isMaxedOut;
@@ -148,7 +148,7 @@ export default async function MarketingPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                coupons.map((coupon) => (
+                coupons.map((coupon: any) => (
                   <TableRow key={coupon.id}>
                     <TableCell className="font-mono font-bold">
                       {coupon.code}

@@ -50,10 +50,10 @@ async function getInstructorDetails(instructorId: string) {
 
   // Calcular receita total
   const totalRevenue = instructor.coursesAsInstructor.reduce(
-    (acc, course) =>
+    (acc: any, course: any) =>
       acc +
       course.orderItems.reduce(
-        (sum, item) => sum + Number(item.priceAtPurchase),
+        (sum: any, item: any) => sum + Number(item.priceAtPurchase),
         0
       ),
     0
@@ -61,7 +61,7 @@ async function getInstructorDetails(instructorId: string) {
 
   // Calcular total de alunos
   const totalStudents = instructor.coursesAsInstructor.reduce(
-    (acc, course) => acc + course.enrollments.length,
+    (acc: any, course: any) => acc + course.enrollments.length,
     0
   );
 
@@ -75,9 +75,10 @@ async function getInstructorDetails(instructorId: string) {
 export default async function InstructorDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const instructor = await getInstructorDetails(params.id);
+  const { id } = await params;
+  const instructor = await getInstructorDetails(id);
   const balance = Number(instructor.instructorProfile?.balance || 0);
 
   // Assumindo 70% de comissão para o instrutor
@@ -135,7 +136,7 @@ export default async function InstructorDetailPage({
             </div>
             <p className="text-xs text-muted-foreground">
               {
-                instructor.coursesAsInstructor.filter((c) => c.isPublished)
+                instructor.coursesAsInstructor.filter((c: any) => c.isPublished)
                   .length
               }{" "}
               publicados
@@ -207,9 +208,9 @@ export default async function InstructorDetailPage({
                   </TableCell>
                 </TableRow>
               ) : (
-                instructor.coursesAsInstructor.map((course) => {
+                instructor.coursesAsInstructor.map((course: any) => {
                   const courseRevenue = course.orderItems.reduce(
-                    (sum, item) => sum + Number(item.priceAtPurchase),
+                    (sum: any, item: any) => sum + Number(item.priceAtPurchase),
                     0
                   );
 
@@ -264,7 +265,7 @@ export default async function InstructorDetailPage({
                   </TableCell>
                 </TableRow>
               ) : (
-                instructor.instructorPayouts.map((payout) => (
+                instructor.instructorPayouts.map((payout: any) => (
                   <TableRow key={payout.id}>
                     <TableCell>
                       {formatDateTime(payout.requestedAt)}

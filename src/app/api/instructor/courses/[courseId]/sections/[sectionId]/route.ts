@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { courseId: string; sectionId: string } }
+  { params }: { params: Promise<{ courseId: string; sectionId: string }> }
 ) {
   try {
     const session = await auth();
@@ -13,9 +13,11 @@ export async function PATCH(
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
+    const { courseId, sectionId } = await params;
+
     // Verificar se a seção pertence ao curso do instrutor
     const section = await db.section.findUnique({
-      where: { id: params.sectionId },
+      where: { id: sectionId },
       include: {
         course: true,
       },
@@ -36,7 +38,7 @@ export async function PATCH(
     const { title, order } = body;
 
     const updatedSection = await db.section.update({
-      where: { id: params.sectionId },
+      where: { id: sectionId },
       data: {
         ...(title !== undefined && { title }),
         ...(order !== undefined && { order }),
@@ -55,7 +57,7 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { courseId: string; sectionId: string } }
+  { params }: { params: Promise<{ courseId: string; sectionId: string }> }
 ) {
   try {
     const session = await auth();
@@ -64,9 +66,11 @@ export async function DELETE(
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
+    const { courseId, sectionId } = await params;
+
     // Verificar se a seção pertence ao curso do instrutor
     const section = await db.section.findUnique({
-      where: { id: params.sectionId },
+      where: { id: sectionId },
       include: {
         course: true,
       },
@@ -84,7 +88,7 @@ export async function DELETE(
     }
 
     await db.section.delete({
-      where: { id: params.sectionId },
+      where: { id: sectionId },
     });
 
     return NextResponse.json({ message: "Seção deletada com sucesso" });

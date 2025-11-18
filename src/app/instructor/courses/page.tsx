@@ -78,7 +78,7 @@ export default async function InstructorCoursesPage() {
         </Card>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {courses.map((course) => (
+          {courses.map((course: any) => (
             <Card key={course.id} className="overflow-hidden">
               <div className="aspect-video bg-muted relative">
                 {course.imageUrl ? (

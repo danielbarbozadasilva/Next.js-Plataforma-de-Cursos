@@ -88,7 +88,7 @@ async function getInstructorAnalytics(instructorId: string) {
 
   // Buscar informações dos cursos
   const coursesWithRevenue = await Promise.all(
-    revenueByСourse.map(async (item) => {
+    revenueByСourse.map(async (item: any) => {
       const course = await db.course.findUnique({
         where: { id: item.courseId },
         select: {

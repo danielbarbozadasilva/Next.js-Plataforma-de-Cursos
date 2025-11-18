@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { courseId: string } }
+  { params }: { params: Promise<{ courseId: string }> }
 ) {
   try {
     const session = await auth();
@@ -13,9 +13,11 @@ export async function GET(
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
+    const { courseId } = await params;
+
     const course = await db.course.findUnique({
       where: {
-        id: params.courseId,
+        id: courseId,
       },
       include: {
         category: true,
@@ -58,7 +60,7 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { courseId: string } }
+  { params }: { params: Promise<{ courseId: string }> }
 ) {
   try {
     const session = await auth();
@@ -67,8 +69,10 @@ export async function PATCH(
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
+    const { courseId } = await params;
+
     const course = await db.course.findUnique({
-      where: { id: params.courseId },
+      where: { id: courseId },
     });
 
     if (!course) {
@@ -93,7 +97,7 @@ export async function PATCH(
     } = body;
 
     const updatedCourse = await db.course.update({
-      where: { id: params.courseId },
+      where: { id: courseId },
       data: {
         ...(title !== undefined && { title }),
         ...(description !== undefined && { description }),
@@ -121,7 +125,7 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { courseId: string } }
+  { params }: { params: Promise<{ courseId: string }> }
 ) {
   try {
     const session = await auth();
@@ -130,8 +134,10 @@ export async function DELETE(
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
+    const { courseId } = await params;
+
     const course = await db.course.findUnique({
-      where: { id: params.courseId },
+      where: { id: courseId },
       include: {
         _count: {
           select: {
@@ -159,7 +165,7 @@ export async function DELETE(
     }
 
     await db.course.delete({
-      where: { id: params.courseId },
+      where: { id: courseId },
     });
 
     return NextResponse.json({ message: "Curso deletado com sucesso" });

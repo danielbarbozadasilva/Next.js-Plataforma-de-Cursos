@@ -3,8 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { Role } from "@prisma/client";
+import { auth, Role } from "@/lib/auth";
 import { Session } from "next-auth";
 import { Resource, Action, hasPermission } from "./rbac";
 

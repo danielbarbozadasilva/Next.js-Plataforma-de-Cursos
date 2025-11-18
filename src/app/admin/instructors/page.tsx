@@ -41,9 +41,9 @@ async function getInstructors() {
     },
   });
 
-  return instructors.map((instructor) => {
+  return instructors.map((instructor: any) => {
     const publishedCourses = instructor.coursesAsInstructor.filter(
-      (c) => c.isPublished
+      (c: any) => c.isPublished
     ).length;
     const totalCourses = instructor.coursesAsInstructor.length;
     const balance = Number(instructor.instructorProfile?.balance || 0);
@@ -94,7 +94,7 @@ export default async function InstructorsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {instructors.reduce((acc, i) => acc + i.pendingPayouts, 0)}
+              {instructors.reduce((acc: any, i: any) => acc + i.pendingPayouts, 0)}
             </div>
           </CardContent>
         </Card>
@@ -108,7 +108,7 @@ export default async function InstructorsPage() {
           <CardContent>
             <div className="text-2xl font-bold">
               {formatCurrency(
-                instructors.reduce((acc, i) => acc + i.balance, 0)
+                instructors.reduce((acc: any, i: any) => acc + i.balance, 0)
               )}
             </div>
           </CardContent>
@@ -141,7 +141,7 @@ export default async function InstructorsPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                instructors.map((instructor) => (
+                instructors.map((instructor: any) => (
                   <TableRow key={instructor.id}>
                     <TableCell className="font-medium">
                       {instructor.name}

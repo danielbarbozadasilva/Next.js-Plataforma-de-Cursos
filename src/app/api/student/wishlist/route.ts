@@ -47,9 +47,9 @@ export async function GET(req: NextRequest) {
     });
 
     // Adicionar rating médio
-    const wishlistWithRating = wishlist.map((item) => {
+    const wishlistWithRating = wishlist.map((item: any) => {
       const totalRating = item.course.reviews.reduce(
-        (sum, r) => sum + r.rating,
+        (sum: any, r: any) => sum + r.rating,
         0
       );
       const avgRating =
@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Dados inválidos", details: error.errors },
+        { error: "Dados inválidos", details: error.issues },
         { status: 400 }
       );
     }
@@ -199,7 +199,7 @@ export async function DELETE(req: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Dados inválidos", details: error.errors },
+        { error: "Dados inválidos", details: error.issues },
         { status: 400 }
       );
     }

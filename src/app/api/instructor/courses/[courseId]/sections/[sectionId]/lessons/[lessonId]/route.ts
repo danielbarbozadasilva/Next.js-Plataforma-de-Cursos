@@ -7,7 +7,7 @@ export async function PATCH(
   {
     params,
   }: {
-    params: { courseId: string; sectionId: string; lessonId: string };
+    params: Promise<{ courseId: string; sectionId: string; lessonId: string }>;
   }
 ) {
   try {
@@ -17,9 +17,11 @@ export async function PATCH(
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
+    const { courseId, sectionId, lessonId } = await params;
+
     // Verificar se a aula pertence à seção do curso do instrutor
     const lesson = await db.lesson.findUnique({
-      where: { id: params.lessonId },
+      where: { id: lessonId },
       include: {
         section: {
           include: {
@@ -44,7 +46,7 @@ export async function PATCH(
     const { title, order, isFreePreview } = body;
 
     const updatedLesson = await db.lesson.update({
-      where: { id: params.lessonId },
+      where: { id: lessonId },
       data: {
         ...(title !== undefined && { title }),
         ...(order !== undefined && { order }),
@@ -67,7 +69,7 @@ export async function DELETE(
   {
     params,
   }: {
-    params: { courseId: string; sectionId: string; lessonId: string };
+    params: Promise<{ courseId: string; sectionId: string; lessonId: string }>;
   }
 ) {
   try {
@@ -77,9 +79,11 @@ export async function DELETE(
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
+    const { courseId, sectionId, lessonId } = await params;
+
     // Verificar se a aula pertence à seção do curso do instrutor
     const lesson = await db.lesson.findUnique({
-      where: { id: params.lessonId },
+      where: { id: lessonId },
       include: {
         section: {
           include: {
@@ -101,7 +105,7 @@ export async function DELETE(
     }
 
     await db.lesson.delete({
-      where: { id: params.lessonId },
+      where: { id: lessonId },
     });
 
     return NextResponse.json({ message: "Aula deletada com sucesso" });

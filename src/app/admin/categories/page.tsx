@@ -26,10 +26,10 @@ async function getCategories() {
     },
   });
 
-  return categories.map((category) => ({
+  return categories.map((category: any) => ({
     ...category,
     totalCourses: category.courses.length,
-    publishedCourses: category.courses.filter((c) => c.isPublished).length,
+    publishedCourses: category.courses.filter((c: any) => c.isPublished).length,
   }));
 }
 
@@ -73,7 +73,7 @@ export default async function CategoriesPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {categories.reduce((acc, cat) => acc + cat.totalCourses, 0)}
+              {categories.reduce((acc: number, cat: any) => acc + cat.totalCourses, 0)}
             </div>
           </CardContent>
         </Card>
@@ -86,7 +86,7 @@ export default async function CategoriesPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {categories.filter((cat) => cat.publishedCourses > 0).length}
+              {categories.filter((cat: any) => cat.publishedCourses > 0).length}
             </div>
             <p className="text-xs text-muted-foreground">
               Com cursos publicados
@@ -119,7 +119,7 @@ export default async function CategoriesPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                categories.map((category) => (
+                categories.map((category: any) => (
                   <TableRow key={category.id}>
                     <TableCell className="font-medium">
                       {category.name}

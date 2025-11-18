@@ -6,7 +6,7 @@
 
 import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
 import { db } from "@/lib/db";
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus } from "@/lib/prisma-types";
 
 // Configuração do Mercado Pago
 const client = new MercadoPagoConfig({

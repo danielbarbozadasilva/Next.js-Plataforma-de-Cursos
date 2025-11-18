@@ -91,8 +91,8 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Calcular média de avaliações para cada curso
-    const coursesWithRating = courses.map((course) => {
-      const totalRating = course.reviews.reduce((sum, r) => sum + r.rating, 0);
+    const coursesWithRating = courses.map((course: any) => {
+      const totalRating = course.reviews.reduce((sum: any, r: any) => sum + r.rating, 0);
       const avgRating = course.reviews.length > 0
         ? totalRating / course.reviews.length
         : 0;
@@ -117,13 +117,13 @@ export async function GET(req: NextRequest) {
     let filteredCourses = coursesWithRating;
     if (minRating) {
       filteredCourses = coursesWithRating.filter(
-        (course) => course.rating >= parseFloat(minRating)
+        (course: any) => course.rating >= parseFloat(minRating)
       );
     }
 
     // Ordenar por rating se necessário
     if (sort === "rating") {
-      filteredCourses.sort((a, b) => b.rating - a.rating);
+      filteredCourses.sort((a: any, b: any) => b.rating - a.rating);
     }
 
     return NextResponse.json({
